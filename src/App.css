@@ -131,19 +131,19 @@
 
 @keyframes studying {
   0% {
-    background-position: 0 -768px;
+    background-position: 0 -896px;
   }
   25% {
-    background-position: -128px -768px;
+    background-position: -128px -896px;
   }
   50% {
-    background-position: -256px -768px;
+    background-position: -256px -896px;
   }
   75% {
-    background-position: -384px -768px;
+    background-position: -384px -896px;
   }
   100% {
-    background-position: 0 -768px;
+    background-position: 0 -896px;
   }
 }
 
@@ -177,7 +177,7 @@
   }
 
   .pet__character--studying {
-    background-position: 0 -768px;
+    background-position: 0 -896px;
   }
 
   .pet__character--celebrating {
