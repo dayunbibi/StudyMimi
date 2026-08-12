@@ -6,6 +6,7 @@ import type {
 import './App.css'
 
 const DRAG_THRESHOLD = 5
+const TODAY_STUDY_STORAGE_KEY = 'studymimi:todayStudySeconds'
 
 type PointerStart = {
   pointerId: number
@@ -26,10 +27,34 @@ function formatTime(totalSeconds: number) {
     : `${paddedMinutes}:${paddedSeconds}`
 }
 
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function loadTodayStudySeconds(): number {
+  try {
+    const raw = window.localStorage.getItem(TODAY_STUDY_STORAGE_KEY)
+    if (!raw) return 0
+
+    const parsed = JSON.parse(raw) as { date: string; seconds: number }
+    return parsed.date === getTodayKey() ? parsed.seconds : 0
+  } catch {
+    return 0
+  }
+}
+
+function saveTodayStudySeconds(seconds: number) {
+  window.localStorage.setItem(
+    TODAY_STUDY_STORAGE_KEY,
+    JSON.stringify({ date: getTodayKey(), seconds }),
+  )
+}
+
 function App() {
   const [isStudying, setIsStudying] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [todayStudySeconds, setTodayStudySeconds] = useState(loadTodayStudySeconds)
   const pointerStart = useRef<PointerStart | null>(null)
 
   useEffect(() => {
@@ -104,12 +129,20 @@ function App() {
     setIsStudying(false)
     setElapsedSeconds(0)
     setIsMenuOpen(false)
+    setTodayStudySeconds((seconds) => {
+      const next = seconds + elapsedSeconds
+      saveTodayStudySeconds(next)
+      return next
+    })
   }
 
   return (
     <main className="pet" aria-label={`StudyMimi, ${isStudying ? 'Studying' : 'Resting'}`}>
       {isMenuOpen && (
         <div className="pet__menu">
+          <span className="pet__menu-today">
+            Today: {formatTime(todayStudySeconds + (isStudying ? elapsedSeconds : 0))}
+          </span>
           <button type="button" onClick={isStudying ? stopStudying : startStudying}>
             {isStudying ? 'Stop Studying' : 'Start Studying'}
           </button>
