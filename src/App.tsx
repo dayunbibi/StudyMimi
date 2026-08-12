@@ -7,6 +7,7 @@ import './App.css'
 
 const DRAG_THRESHOLD = 5
 const TODAY_STUDY_STORAGE_KEY = 'studymimi:todayStudySeconds'
+const CELEBRATE_DURATION_MS = 1500
 
 type PointerStart = {
   pointerId: number
@@ -14,6 +15,8 @@ type PointerStart = {
   screenY: number
   dragged: boolean
 }
+
+type PetAnimation = 'idle' | 'studying' | 'celebrating'
 
 function formatTime(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600)
@@ -55,7 +58,9 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [todayStudySeconds, setTodayStudySeconds] = useState(loadTodayStudySeconds)
+  const [petAnimation, setPetAnimation] = useState<PetAnimation>('idle')
   const pointerStart = useRef<PointerStart | null>(null)
+  const celebrateTimeout = useRef<number | null>(null)
 
   useEffect(() => {
     if (!isStudying) return
@@ -67,6 +72,12 @@ function App() {
 
     return () => window.clearInterval(timer)
   }, [isStudying])
+
+  useEffect(() => {
+    return () => {
+      if (celebrateTimeout.current !== null) window.clearTimeout(celebrateTimeout.current)
+    }
+  }, [])
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return
@@ -120,9 +131,14 @@ function App() {
   }
 
   const startStudying = () => {
+    if (celebrateTimeout.current !== null) {
+      window.clearTimeout(celebrateTimeout.current)
+      celebrateTimeout.current = null
+    }
     setElapsedSeconds(0)
     setIsStudying(true)
     setIsMenuOpen(false)
+    setPetAnimation('studying')
   }
 
   const stopStudying = () => {
@@ -134,6 +150,11 @@ function App() {
       saveTodayStudySeconds(next)
       return next
     })
+    setPetAnimation('celebrating')
+    celebrateTimeout.current = window.setTimeout(() => {
+      setPetAnimation('idle')
+      celebrateTimeout.current = null
+    }, CELEBRATE_DURATION_MS)
   }
 
   return (
@@ -150,7 +171,11 @@ function App() {
       )}
 
       <div
-        className="pet__character"
+        className={
+          petAnimation === 'idle'
+            ? 'pet__character'
+            : `pet__character pet__character--${petAnimation}`
+        }
         aria-label="Open StudyMimi menu"
         role="button"
         tabIndex={0}

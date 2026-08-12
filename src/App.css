@@ -35,6 +35,14 @@
   filter: drop-shadow(0 0 5px rgb(72 117 181 / 70%));
 }
 
+.pet__character--studying {
+  animation: studying 2s step-end infinite;
+}
+
+.pet__character--celebrating {
+  animation: celebrate 0.6s step-end infinite;
+}
+
 .pet__status {
   display: flex;
   flex-direction: column;
@@ -107,19 +115,13 @@
   0% {
     background-position: 0 0;
   }
-  16.67% {
+  25% {
     background-position: -128px 0;
   }
-  33.33% {
-    background-position: -256px 0;
-  }
   50% {
-    background-position: -384px 0;
-  }
-  66.67% {
     background-position: 0 -128px;
   }
-  83.33% {
+  75% {
     background-position: -128px -128px;
   }
   100% {
@@ -127,9 +129,58 @@
   }
 }
 
+@keyframes studying {
+  0% {
+    background-position: 0 -768px;
+  }
+  25% {
+    background-position: -128px -768px;
+  }
+  50% {
+    background-position: -256px -768px;
+  }
+  75% {
+    background-position: -384px -768px;
+  }
+  100% {
+    background-position: 0 -768px;
+  }
+}
+
+@keyframes celebrate {
+  0% {
+    background-position: 0 -512px;
+  }
+  25% {
+    background-position: -128px -512px;
+  }
+  50% {
+    background-position: -256px -512px;
+  }
+  75% {
+    background-position: -384px -512px;
+  }
+  100% {
+    background-position: 0 -512px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pet__character {
+  .pet__character,
+  .pet__character--studying,
+  .pet__character--celebrating {
     animation: none;
-    background-position: -256px 0;
+  }
+
+  .pet__character {
+    background-position: -128px 0;
+  }
+
+  .pet__character--studying {
+    background-position: 0 -768px;
+  }
+
+  .pet__character--celebrating {
+    background-position: 0 -512px;
   }
 }
