@@ -72,7 +72,7 @@ export const CHARACTERS: CharacterConfig[] = [
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(4, 2), frameIntervalMs: 150 },
-      studying: { frames: frameRow(6, 2), frameIntervalMs: 500 },
+      studying: { frames: frameRow(6, 1), frameIntervalMs: 500 },
       tired: { frames: frameRow(8, 2), frameIntervalMs: 700 },
     },
   },
@@ -85,7 +85,7 @@ export const CHARACTERS: CharacterConfig[] = [
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(4, 2), frameIntervalMs: 150 },
-      studying: { frames: frameRow(6, 2), frameIntervalMs: 500 },
+      studying: { frames: frameRow(6, 1), frameIntervalMs: 500 },
       tired: { frames: frameRow(8, 2), frameIntervalMs: 700 },
     },
   },
