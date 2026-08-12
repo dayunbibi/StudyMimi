@@ -27,7 +27,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet1',
     name: 'Biscuit',
-    file: '/characters/pet1.png',
+    file: 'characters/pet1.png',
     sheetWidth: 512,
     sheetHeight: 1408,
     animations: {
@@ -40,7 +40,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet3',
     name: 'Waffle',
-    file: '/characters/pet3.png',
+    file: 'characters/pet3.png',
     sheetWidth: 512,
     sheetHeight: 1152,
     animations: {
@@ -53,7 +53,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet3_1',
     name: 'Praline',
-    file: '/characters/pet3_1.png',
+    file: 'characters/pet3_1.png',
     sheetWidth: 512,
     sheetHeight: 1152,
     animations: {
@@ -66,7 +66,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet4',
     name: 'Marble',
-    file: '/characters/pet4.png',
+    file: 'characters/pet4.png',
     sheetWidth: 512,
     sheetHeight: 1280,
     animations: {
@@ -79,7 +79,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet4_1',
     name: 'Clover',
-    file: '/characters/pet4_1.png',
+    file: 'characters/pet4_1.png',
     sheetWidth: 512,
     sheetHeight: 1280,
     animations: {
@@ -92,7 +92,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet5',
     name: 'Sugar',
-    file: '/characters/pet5.png',
+    file: 'characters/pet5.png',
     sheetWidth: 512,
     sheetHeight: 1280,
     animations: {
@@ -105,7 +105,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet6',
     name: 'Peanut',
-    file: '/characters/pet6.png',
+    file: 'characters/pet6.png',
     sheetWidth: 512,
     sheetHeight: 1024,
     animations: {
@@ -118,7 +118,7 @@ export const CHARACTERS: CharacterConfig[] = [
   {
     id: 'pet7',
     name: 'Choco',
-    file: '/characters/pet7.png',
+    file: 'characters/pet7.png',
     sheetWidth: 512,
     sheetHeight: 896,
     animations: {
