@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import type {
+  CSSProperties,
   KeyboardEvent as ReactKeyboardEvent,
   PointerEvent as ReactPointerEvent,
 } from 'react'
 import './App.css'
+import { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacterById } from './characters'
 
 const DRAG_THRESHOLD = 5
 const TODAY_STUDY_STORAGE_KEY = 'studymimi:todayStudySeconds'
+const CHARACTER_STORAGE_KEY = 'studymimi:selectedCharacter'
 const CELEBRATE_DURATION_MS = 1500
+const TIRED_THRESHOLD_SECONDS = 60 * 60
+const FRAME_SIZE = 128
+const PREVIEW_SCALE = 40 / FRAME_SIZE
 
 type PointerStart = {
   pointerId: number
@@ -53,14 +59,41 @@ function saveTodayStudySeconds(seconds: number) {
   )
 }
 
+function loadSelectedCharacterId(): string {
+  try {
+    const raw = window.localStorage.getItem(CHARACTER_STORAGE_KEY)
+    return raw && CHARACTERS.some((character) => character.id === raw)
+      ? raw
+      : DEFAULT_CHARACTER_ID
+  } catch {
+    return DEFAULT_CHARACTER_ID
+  }
+}
+
 function App() {
   const [isStudying, setIsStudying] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [todayStudySeconds, setTodayStudySeconds] = useState(loadTodayStudySeconds)
   const [petAnimation, setPetAnimation] = useState<PetAnimation>('idle')
+  const [selectedCharacterId, setSelectedCharacterId] = useState(loadSelectedCharacterId)
+  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [frameIndex, setFrameIndex] = useState(0)
   const pointerStart = useRef<PointerStart | null>(null)
   const celebrateTimeout = useRef<number | null>(null)
+
+  const character = getCharacterById(selectedCharacterId)
+  const animationKey =
+    petAnimation === 'studying' && elapsedSeconds >= TIRED_THRESHOLD_SECONDS
+      ? 'tired'
+      : petAnimation
+  const animation = character.animations[animationKey]
+  const frame = animation.frames[frameIndex % animation.frames.length]
+  const petStyle: CSSProperties = {
+    backgroundImage: `url('${character.file}')`,
+    backgroundSize: `${character.sheetWidth}px ${character.sheetHeight}px`,
+    backgroundPosition: `-${frame.col * FRAME_SIZE}px -${frame.row * FRAME_SIZE}px`,
+  }
 
   useEffect(() => {
     if (!isStudying) return
@@ -78,6 +111,21 @@ function App() {
       if (celebrateTimeout.current !== null) window.clearTimeout(celebrateTimeout.current)
     }
   }, [])
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion || animation.frames.length <= 1) return
+
+    const timer = window.setInterval(() => {
+      setFrameIndex((index) => (index + 1) % animation.frames.length)
+    }, animation.frameIntervalMs)
+
+    return () => window.clearInterval(timer)
+  }, [character.id, animationKey, animation])
+
+  useEffect(() => {
+    window.petWindow.setExpanded(isPickerOpen)
+  }, [isPickerOpen])
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return
@@ -157,6 +205,17 @@ function App() {
     }, CELEBRATE_DURATION_MS)
   }
 
+  const openPicker = () => {
+    setIsMenuOpen(false)
+    setIsPickerOpen(true)
+  }
+
+  const selectCharacter = (id: string) => {
+    setSelectedCharacterId(id)
+    window.localStorage.setItem(CHARACTER_STORAGE_KEY, id)
+    setIsPickerOpen(false)
+  }
+
   return (
     <main className="pet" aria-label={`StudyMimi, ${isStudying ? 'Studying' : 'Resting'}`}>
       {isMenuOpen && (
@@ -167,15 +226,49 @@ function App() {
           <button type="button" onClick={isStudying ? stopStudying : startStudying}>
             {isStudying ? 'Stop Studying' : 'Start Studying'}
           </button>
+          <button type="button" onClick={openPicker}>
+            Change Mimi
+          </button>
+        </div>
+      )}
+
+      {isPickerOpen && (
+        <div className="pet__picker">
+          <div className="pet__picker-grid">
+            {CHARACTERS.map((option) => {
+              const previewFrame = option.animations.idle.frames[0]
+              const previewStyle: CSSProperties = {
+                backgroundImage: `url('${option.file}')`,
+                backgroundSize: `${option.sheetWidth * PREVIEW_SCALE}px ${option.sheetHeight * PREVIEW_SCALE}px`,
+                backgroundPosition: `-${previewFrame.col * FRAME_SIZE * PREVIEW_SCALE}px -${previewFrame.row * FRAME_SIZE * PREVIEW_SCALE}px`,
+              }
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={
+                    option.id === selectedCharacterId
+                      ? 'pet__picker-item pet__picker-item--selected'
+                      : 'pet__picker-item'
+                  }
+                  onClick={() => selectCharacter(option.id)}
+                >
+                  <span className="pet__picker-preview" style={previewStyle} />
+                  <span className="pet__picker-name">{option.name}</span>
+                </button>
+              )
+            })}
+          </div>
+          <button type="button" className="pet__picker-close" onClick={() => setIsPickerOpen(false)}>
+            Close
+          </button>
         </div>
       )}
 
       <div
-        className={
-          petAnimation === 'idle'
-            ? 'pet__character'
-            : `pet__character pet__character--${petAnimation}`
-        }
+        className="pet__character"
+        style={petStyle}
         aria-label="Open StudyMimi menu"
         role="button"
         tabIndex={0}
