@@ -16,11 +16,15 @@
 }
 
 .pet__character {
-  font-size: 92px;
-  line-height: 1;
+  width: 128px;
+  height: 128px;
+  flex: 0 0 128px;
+  background-image: url('/pet1.png');
+  background-repeat: no-repeat;
+  background-size: 512px 1408px;
+  image-rendering: pixelated;
   filter: drop-shadow(0 5px 6px rgb(70 49 60 / 24%));
-  transform-origin: bottom center;
-  animation: breathe 2.4s ease-in-out infinite;
+  animation: idle 1.5s step-end infinite;
 }
 
 .pet__status {
@@ -35,18 +39,33 @@
   line-height: 1;
 }
 
-@keyframes breathe {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
+@keyframes idle {
+  0% {
+    background-position: 0 0;
+  }
+  16.67% {
+    background-position: -128px 0;
+  }
+  33.33% {
+    background-position: -256px 0;
   }
   50% {
-    transform: translateY(-3px) scale(1.025);
+    background-position: -384px 0;
+  }
+  66.67% {
+    background-position: 0 -128px;
+  }
+  83.33% {
+    background-position: -128px -128px;
+  }
+  100% {
+    background-position: 0 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pet__character {
     animation: none;
+    background-position: -256px 0;
   }
 }
