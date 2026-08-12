@@ -10,10 +10,10 @@ import { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacterById } from './characters
 const DRAG_THRESHOLD = 5
 const TODAY_STUDY_STORAGE_KEY = 'studymimi:todayStudySeconds'
 const CHARACTER_STORAGE_KEY = 'studymimi:selectedCharacter'
+const PET_SIZE_STORAGE_KEY = 'studymimi:petSize'
 const CELEBRATE_DURATION_MS = 1500
 const TIRED_THRESHOLD_SECONDS = 60 * 60
 const FRAME_SIZE = 128
-const PREVIEW_SCALE = 40 / FRAME_SIZE
 
 type PointerStart = {
   pointerId: number
@@ -23,6 +23,18 @@ type PointerStart = {
 }
 
 type PetAnimation = 'idle' | 'studying' | 'celebrating'
+
+const PET_SIZES = [
+  { id: 'small', multiplier: 0.8 },
+  { id: 'medium', multiplier: 1 },
+  { id: 'large', multiplier: 1.25 },
+] as const
+
+const DEFAULT_PET_SIZE_ID = 'medium'
+
+function getPetSizeMultiplier(id: string): number {
+  return PET_SIZES.find((size) => size.id === id)?.multiplier ?? 1
+}
 
 function formatTime(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600)
@@ -70,6 +82,15 @@ function loadSelectedCharacterId(): string {
   }
 }
 
+function loadPetSizeId(): string {
+  try {
+    const raw = window.localStorage.getItem(PET_SIZE_STORAGE_KEY)
+    return raw && PET_SIZES.some((size) => size.id === raw) ? raw : DEFAULT_PET_SIZE_ID
+  } catch {
+    return DEFAULT_PET_SIZE_ID
+  }
+}
+
 function App() {
   const [isStudying, setIsStudying] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -77,7 +98,7 @@ function App() {
   const [todayStudySeconds, setTodayStudySeconds] = useState(loadTodayStudySeconds)
   const [petAnimation, setPetAnimation] = useState<PetAnimation>('idle')
   const [selectedCharacterId, setSelectedCharacterId] = useState(loadSelectedCharacterId)
-  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [petSizeId, setPetSizeId] = useState(loadPetSizeId)
   const [frameIndex, setFrameIndex] = useState(0)
   const pointerStart = useRef<PointerStart | null>(null)
   const celebrateTimeout = useRef<number | null>(null)
@@ -93,8 +114,9 @@ function App() {
     backgroundImage: `url('${character.file}')`,
     backgroundSize: `${character.sheetWidth}px ${character.sheetHeight}px`,
     backgroundPosition: `-${frame.col * FRAME_SIZE}px -${frame.row * FRAME_SIZE}px`,
-    transform: `scale(${character.sizeScale})`,
+    transform: `scale(${character.sizeScale * getPetSizeMultiplier(petSizeId)})`,
   }
+  const todayTotalSeconds = todayStudySeconds + (isStudying ? elapsedSeconds : 0)
 
   useEffect(() => {
     if (!isStudying) return
@@ -125,8 +147,18 @@ function App() {
   }, [character.id, animationKey, animation])
 
   useEffect(() => {
-    window.petWindow.setExpanded(isPickerOpen)
-  }, [isPickerOpen])
+    window.localStorage.setItem(PET_SIZE_STORAGE_KEY, petSizeId)
+    window.petWindow.setWindowScale(getPetSizeMultiplier(petSizeId))
+  }, [petSizeId])
+
+  useEffect(() => {
+    window.petWindow.syncState({
+      isStudying,
+      todayTotalSeconds,
+      selectedCharacterId,
+      petSizeId,
+    })
+  }, [isStudying, todayTotalSeconds, selectedCharacterId, petSizeId])
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return
@@ -206,64 +238,38 @@ function App() {
     }, CELEBRATE_DURATION_MS)
   }
 
-  const openPicker = () => {
-    setIsMenuOpen(false)
-    setIsPickerOpen(true)
-  }
-
   const selectCharacter = (id: string) => {
     setSelectedCharacterId(id)
     window.localStorage.setItem(CHARACTER_STORAGE_KEY, id)
-    setIsPickerOpen(false)
   }
+
+  const latestHandlers = useRef({ isStudying, startStudying, stopStudying, selectCharacter, setPetSizeId })
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs every render to keep the ref current
+  useEffect(() => {
+    latestHandlers.current = { isStudying, startStudying, stopStudying, selectCharacter, setPetSizeId }
+  })
+
+  useEffect(() => {
+    return window.petWindow.onTrayCommand((command) => {
+      const handlers = latestHandlers.current
+      if (command.type === 'toggle-studying') {
+        if (handlers.isStudying) handlers.stopStudying()
+        else handlers.startStudying()
+      } else if (command.type === 'select-character') {
+        handlers.selectCharacter(command.id)
+      } else if (command.type === 'set-pet-size') {
+        handlers.setPetSizeId(command.id)
+      }
+    })
+  }, [])
 
   return (
     <main className="pet" aria-label={`StudyMimi, ${isStudying ? 'Studying' : 'Resting'}`}>
       {isMenuOpen && (
         <div className="pet__menu">
-          <span className="pet__menu-today">
-            Today: {formatTime(todayStudySeconds + (isStudying ? elapsedSeconds : 0))}
-          </span>
           <button type="button" onClick={isStudying ? stopStudying : startStudying}>
             {isStudying ? 'Stop Studying' : 'Start Studying'}
-          </button>
-          <button type="button" onClick={openPicker}>
-            Change Mimi
-          </button>
-        </div>
-      )}
-
-      {isPickerOpen && (
-        <div className="pet__picker">
-          <div className="pet__picker-grid">
-            {CHARACTERS.map((option) => {
-              const previewFrame = option.animations.idle.frames[0]
-              const previewStyle: CSSProperties = {
-                backgroundImage: `url('${option.file}')`,
-                backgroundSize: `${option.sheetWidth * PREVIEW_SCALE}px ${option.sheetHeight * PREVIEW_SCALE}px`,
-                backgroundPosition: `-${previewFrame.col * FRAME_SIZE * PREVIEW_SCALE}px -${previewFrame.row * FRAME_SIZE * PREVIEW_SCALE}px`,
-                transform: `scale(${option.sizeScale})`,
-              }
-
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={
-                    option.id === selectedCharacterId
-                      ? 'pet__picker-item pet__picker-item--selected'
-                      : 'pet__picker-item'
-                  }
-                  onClick={() => selectCharacter(option.id)}
-                >
-                  <span className="pet__picker-preview" style={previewStyle} />
-                  <span className="pet__picker-name">{option.name}</span>
-                </button>
-              )
-            })}
-          </div>
-          <button type="button" className="pet__picker-close" onClick={() => setIsPickerOpen(false)}>
-            Close
           </button>
         </div>
       )}

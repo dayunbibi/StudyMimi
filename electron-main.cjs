@@ -1,15 +1,50 @@
 const { app, BrowserWindow, ipcMain, screen, Tray, Menu, nativeImage } = require('electron')
 const path = require('node:path')
 
-const WINDOW_WIDTH = 180
-const WINDOW_HEIGHT = 180
-const EXPANDED_WINDOW_WIDTH = 220
-const EXPANDED_WINDOW_HEIGHT = 300
+const BASE_WINDOW_WIDTH = 180
+const BASE_WINDOW_HEIGHT = 180
 const SCREEN_MARGIN = 20
 const TRAY_ICON_SIZE = 22
 const dragStates = new Map()
 let petWindow = null
 let tray = null
+let windowScaleMultiplier = 1
+let alwaysOnTopEnabled = true
+let mimiVisible = true
+
+// Keep in sync with CHARACTERS in src/characters.ts.
+const MENU_CHARACTERS = [
+  { id: 'pet1', name: 'Biscuit' },
+  { id: 'pet3', name: 'Waffle' },
+  { id: 'pet3_1', name: 'Praline' },
+  { id: 'pet4', name: 'Marble' },
+  { id: 'pet4_1', name: 'Clover' },
+  { id: 'pet5', name: 'Sugar' },
+  { id: 'pet6', name: 'Peanut' },
+  { id: 'pet7', name: 'Choco' },
+]
+
+const PET_SIZES = [
+  { id: 'small', label: 'Small' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'large', label: 'Large' },
+]
+
+const petState = {
+  isStudying: false,
+  todayTotalSeconds: 0,
+  selectedCharacterId: 'pet1',
+  petSizeId: 'medium',
+}
+
+function formatDuration(totalSeconds) {
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const pad = (value) => String(value).padStart(2, '0')
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+}
 
 function clampPosition(window, x, y) {
   const bounds = window.getBounds()
@@ -49,17 +84,25 @@ ipcMain.on('pet-drag-end', (event) => {
   dragStates.delete(event.sender.id)
 })
 
-ipcMain.on('pet-set-expanded', (event, expanded) => {
+ipcMain.on('pet-set-window-scale', (event, multiplier) => {
+  if (!Number.isFinite(multiplier) || multiplier <= 0) return
+  windowScaleMultiplier = multiplier
+
   const window = BrowserWindow.fromWebContents(event.sender)
   if (!window) return
 
   const [x, y] = window.getPosition()
-  const width = expanded ? EXPANDED_WINDOW_WIDTH : WINDOW_WIDTH
-  const height = expanded ? EXPANDED_WINDOW_HEIGHT : WINDOW_HEIGHT
+  const width = Math.round(BASE_WINDOW_WIDTH * multiplier)
+  const height = Math.round(BASE_WINDOW_HEIGHT * multiplier)
   window.setSize(width, height)
 
   const position = clampPosition(window, x, y)
   window.setPosition(position.x, position.y)
+})
+
+ipcMain.on('pet-state-sync', (event, state) => {
+  if (!state || typeof state !== 'object') return
+  Object.assign(petState, state)
 })
 
 function keepWindowOnScreen(window) {
@@ -90,6 +133,65 @@ function showPetWindow() {
   petWindow.focus()
 }
 
+function sendTrayCommand(command) {
+  if (!petWindow) return
+  petWindow.webContents.send('tray-command', command)
+}
+
+function buildTrayMenu() {
+  return Menu.buildFromTemplate([
+    { label: 'StudyMimi', enabled: false },
+    { type: 'separator' },
+    {
+      label: petState.isStudying ? 'Stop Studying' : 'Start Studying',
+      click: () => sendTrayCommand({ type: 'toggle-studying' }),
+    },
+    {
+      label: 'Change Mimi',
+      submenu: MENU_CHARACTERS.map((character) => ({
+        label: character.name,
+        type: 'radio',
+        checked: character.id === petState.selectedCharacterId,
+        click: () => sendTrayCommand({ type: 'select-character', id: character.id }),
+      })),
+    },
+    {
+      label: 'Pet Size',
+      submenu: PET_SIZES.map((size) => ({
+        label: size.label,
+        type: 'radio',
+        checked: size.id === petState.petSizeId,
+        click: () => sendTrayCommand({ type: 'set-pet-size', id: size.id }),
+      })),
+    },
+    { type: 'separator' },
+    {
+      label: 'Always on Top',
+      type: 'checkbox',
+      checked: alwaysOnTopEnabled,
+      click: () => {
+        alwaysOnTopEnabled = !alwaysOnTopEnabled
+        if (petWindow) petWindow.setAlwaysOnTop(alwaysOnTopEnabled, 'floating')
+      },
+    },
+    {
+      label: 'Show Mimi',
+      type: 'checkbox',
+      checked: mimiVisible,
+      click: () => {
+        mimiVisible = !mimiVisible
+        if (!petWindow) return
+        if (mimiVisible) showPetWindow()
+        else petWindow.hide()
+      },
+    },
+    { type: 'separator' },
+    { label: `Today: ${formatDuration(petState.todayTotalSeconds)}`, enabled: false },
+    { type: 'separator' },
+    { label: 'Quit StudyMimi', click: () => app.quit() },
+  ])
+}
+
 function createTray() {
   const icon = nativeImage
     .createFromPath(path.join(__dirname, 'dist', 'characters', 'pet1.png'))
@@ -98,22 +200,17 @@ function createTray() {
 
   tray = new Tray(icon)
   tray.setToolTip('StudyMimi')
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: 'Show Mimi', click: showPetWindow },
-      { type: 'separator' },
-      { label: 'Quit', click: () => app.quit() },
-    ]),
-  )
+  tray.on('click', () => tray.popUpContextMenu(buildTrayMenu()))
+  tray.on('right-click', () => tray.popUpContextMenu(buildTrayMenu()))
 }
 
 function createPetWindow() {
   const { x, y, width, height } = screen.getPrimaryDisplay().workArea
   const window = new BrowserWindow({
-    width: WINDOW_WIDTH,
-    height: WINDOW_HEIGHT,
-    x: x + width - WINDOW_WIDTH - SCREEN_MARGIN,
-    y: y + height - WINDOW_HEIGHT - SCREEN_MARGIN,
+    width: BASE_WINDOW_WIDTH,
+    height: BASE_WINDOW_HEIGHT,
+    x: x + width - BASE_WINDOW_WIDTH - SCREEN_MARGIN,
+    y: y + height - BASE_WINDOW_HEIGHT - SCREEN_MARGIN,
     transparent: true,
     frame: false,
     resizable: false,

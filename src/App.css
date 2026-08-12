@@ -67,18 +67,6 @@
   gap: 4px;
 }
 
-.pet__menu-today {
-  white-space: nowrap;
-  border: 1px solid rgb(255 255 255 / 85%);
-  border-radius: 999px;
-  padding: 3px 9px;
-  color: #7d6d80;
-  background: rgb(255 250 252 / 90%);
-  box-shadow: 0 3px 8px rgb(70 49 60 / 16%);
-  font: 600 11px/1 -apple-system, BlinkMacSystemFont, sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-
 .pet__menu button {
   white-space: nowrap;
   border: 1px solid rgb(255 255 255 / 90%);
@@ -98,79 +86,4 @@
 .pet__menu button:focus-visible {
   outline: 2px solid #7399ce;
   outline-offset: 2px;
-}
-
-.pet__picker {
-  position: absolute;
-  z-index: 3;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  box-sizing: border-box;
-  width: 200px;
-  padding: 10px;
-  border: 2px solid rgb(255 255 255 / 82%);
-  border-radius: 16px;
-  background: rgb(255 250 252 / 97%);
-  box-shadow: 0 6px 16px rgb(70 49 60 / 24%);
-}
-
-.pet__picker-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  width: 100%;
-}
-
-.pet__picker-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 4px;
-  background: transparent;
-  cursor: pointer;
-}
-
-.pet__picker-item:hover {
-  background: rgb(255 229 239 / 60%);
-}
-
-.pet__picker-item--selected {
-  border-color: #7399ce;
-  background: rgb(255 229 239 / 80%);
-}
-
-.pet__picker-preview {
-  width: 40px;
-  height: 40px;
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
-}
-
-.pet__picker-name {
-  color: #554a59;
-  font: 600 10px/1.2 -apple-system, BlinkMacSystemFont, sans-serif;
-  text-align: center;
-}
-
-.pet__picker-close {
-  border: 1px solid rgb(255 255 255 / 90%);
-  border-radius: 999px;
-  padding: 5px 12px;
-  color: #554a59;
-  background: rgb(255 250 252 / 96%);
-  box-shadow: 0 3px 8px rgb(70 49 60 / 18%);
-  font: 600 12px/1 -apple-system, BlinkMacSystemFont, sans-serif;
-  cursor: pointer;
-}
-
-.pet__picker-close:hover {
-  background: #fff;
 }
