@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron')
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu, nativeImage } = require('electron')
 const path = require('node:path')
 
 const WINDOW_WIDTH = 180
@@ -6,7 +6,10 @@ const WINDOW_HEIGHT = 180
 const EXPANDED_WINDOW_WIDTH = 220
 const EXPANDED_WINDOW_HEIGHT = 300
 const SCREEN_MARGIN = 20
+const TRAY_ICON_SIZE = 22
 const dragStates = new Map()
+let petWindow = null
+let tray = null
 
 function clampPosition(window, x, y) {
   const bounds = window.getBounds()
@@ -78,6 +81,32 @@ function keepWindowOnScreen(window) {
   })
 }
 
+function showPetWindow() {
+  if (!petWindow) return
+
+  const position = clampPosition(petWindow, ...petWindow.getPosition())
+  petWindow.setPosition(position.x, position.y)
+  petWindow.show()
+  petWindow.focus()
+}
+
+function createTray() {
+  const icon = nativeImage
+    .createFromPath(path.join(__dirname, 'dist', 'characters', 'pet1.png'))
+    .crop({ x: 0, y: 0, width: 128, height: 128 })
+    .resize({ width: TRAY_ICON_SIZE, height: TRAY_ICON_SIZE, quality: 'best' })
+
+  tray = new Tray(icon)
+  tray.setToolTip('StudyMimi')
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: 'Show Mimi', click: showPetWindow },
+      { type: 'separator' },
+      { label: 'Quit', click: () => app.quit() },
+    ]),
+  )
+}
+
 function createPetWindow() {
   const { x, y, width, height } = screen.getPrimaryDisplay().workArea
   const window = new BrowserWindow({
@@ -106,11 +135,16 @@ function createPetWindow() {
   keepWindowOnScreen(window)
   window.loadFile(path.join(__dirname, 'dist', 'index.html'))
   window.once('ready-to-show', () => window.show())
+  window.on('closed', () => {
+    if (petWindow === window) petWindow = null
+  })
+  petWindow = window
 }
 
 app.whenReady().then(() => {
   if (process.platform === 'darwin') app.setActivationPolicy('accessory')
   createPetWindow()
+  createTray()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createPetWindow()
