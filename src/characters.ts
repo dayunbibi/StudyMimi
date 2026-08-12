@@ -11,6 +11,7 @@ export type CharacterConfig = {
   file: string
   sheetWidth: number
   sheetHeight: number
+  sizeScale: number
   animations: {
     idle: CharacterAnimation
     studying: CharacterAnimation
@@ -30,6 +31,7 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet1.png',
     sheetWidth: 512,
     sheetHeight: 1408,
+    sizeScale: 1,
     animations: {
       idle: { frames: [...frameRow(0, 2), ...frameRow(1, 2)], frameIntervalMs: 375 },
       celebrating: { frames: frameRow(4, 4), frameIntervalMs: 150 },
@@ -43,6 +45,7 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet3.png',
     sheetWidth: 512,
     sheetHeight: 1152,
+    sizeScale: 1,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(3, 2), frameIntervalMs: 150 },
@@ -56,6 +59,7 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet3_1.png',
     sheetWidth: 512,
     sheetHeight: 1152,
+    sizeScale: 1,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(3, 2), frameIntervalMs: 150 },
@@ -69,10 +73,11 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet4.png',
     sheetWidth: 512,
     sheetHeight: 1280,
+    sizeScale: 1.35,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(4, 2), frameIntervalMs: 150 },
-      studying: { frames: frameRow(6, 1), frameIntervalMs: 500 },
+      studying: { frames: frameRow(2, 4), frameIntervalMs: 500 },
       tired: { frames: frameRow(8, 2), frameIntervalMs: 700 },
     },
   },
@@ -82,10 +87,11 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet4_1.png',
     sheetWidth: 512,
     sheetHeight: 1280,
+    sizeScale: 1.35,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(4, 2), frameIntervalMs: 150 },
-      studying: { frames: frameRow(6, 1), frameIntervalMs: 500 },
+      studying: { frames: frameRow(2, 4), frameIntervalMs: 500 },
       tired: { frames: frameRow(8, 2), frameIntervalMs: 700 },
     },
   },
@@ -95,6 +101,7 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet5.png',
     sheetWidth: 512,
     sheetHeight: 1280,
+    sizeScale: 1,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(4, 2), frameIntervalMs: 150 },
@@ -108,6 +115,7 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet6.png',
     sheetWidth: 512,
     sheetHeight: 1024,
+    sizeScale: 1,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(3, 2), frameIntervalMs: 150 },
@@ -121,10 +129,11 @@ export const CHARACTERS: CharacterConfig[] = [
     file: 'characters/pet7.png',
     sheetWidth: 512,
     sheetHeight: 896,
+    sizeScale: 1,
     animations: {
       idle: { frames: frameRow(0, 2), frameIntervalMs: 375 },
       celebrating: { frames: frameRow(3, 2), frameIntervalMs: 150 },
-      studying: { frames: frameRow(4, 2), frameIntervalMs: 500 },
+      studying: { frames: frameRow(5, 4), frameIntervalMs: 500 },
       tired: { frames: frameRow(6, 2), frameIntervalMs: 700 },
     },
   },

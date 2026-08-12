@@ -93,6 +93,7 @@ function App() {
     backgroundImage: `url('${character.file}')`,
     backgroundSize: `${character.sheetWidth}px ${character.sheetHeight}px`,
     backgroundPosition: `-${frame.col * FRAME_SIZE}px -${frame.row * FRAME_SIZE}px`,
+    transform: `scale(${character.sizeScale})`,
   }
 
   useEffect(() => {
@@ -241,6 +242,7 @@ function App() {
                 backgroundImage: `url('${option.file}')`,
                 backgroundSize: `${option.sheetWidth * PREVIEW_SCALE}px ${option.sheetHeight * PREVIEW_SCALE}px`,
                 backgroundPosition: `-${previewFrame.col * FRAME_SIZE * PREVIEW_SCALE}px -${previewFrame.row * FRAME_SIZE * PREVIEW_SCALE}px`,
+                transform: `scale(${option.sizeScale})`,
               }
 
               return (
