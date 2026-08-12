@@ -3,6 +3,8 @@ const path = require('node:path')
 
 const WINDOW_WIDTH = 180
 const WINDOW_HEIGHT = 180
+const EXPANDED_WINDOW_WIDTH = 220
+const EXPANDED_WINDOW_HEIGHT = 300
 const SCREEN_MARGIN = 20
 const dragStates = new Map()
 
@@ -42,6 +44,19 @@ ipcMain.on('pet-drag-move', (event, mouseX, mouseY) => {
 
 ipcMain.on('pet-drag-end', (event) => {
   dragStates.delete(event.sender.id)
+})
+
+ipcMain.on('pet-set-expanded', (event, expanded) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (!window) return
+
+  const [x, y] = window.getPosition()
+  const width = expanded ? EXPANDED_WINDOW_WIDTH : WINDOW_WIDTH
+  const height = expanded ? EXPANDED_WINDOW_HEIGHT : WINDOW_HEIGHT
+  window.setSize(width, height)
+
+  const position = clampPosition(window, x, y)
+  window.setPosition(position.x, position.y)
 })
 
 function keepWindowOnScreen(window) {

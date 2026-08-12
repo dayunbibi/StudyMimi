@@ -6,6 +6,7 @@ declare global {
       startDrag: (screenX: number, screenY: number) => void
       moveDrag: (screenX: number, screenY: number) => void
       endDrag: () => void
+      setExpanded: (expanded: boolean) => void
     }
   }
 }
