@@ -1,12 +1,12 @@
 const { app, BrowserWindow, ipcMain, screen, Tray, Menu, nativeImage } = require('electron')
 const path = require('node:path')
+const fs = require('node:fs')
 
 const WINDOW_WIDTH = 180
 const WINDOW_HEIGHT = 180
 const EXPANDED_WINDOW_WIDTH = 220
 const EXPANDED_WINDOW_HEIGHT = 300
 const SCREEN_MARGIN = 20
-const TRAY_ICON_SIZE = 22
 const dragStates = new Map()
 let petWindow = null
 let tray = null
@@ -91,10 +91,15 @@ function showPetWindow() {
 }
 
 function createTray() {
-  const icon = nativeImage
-    .createFromPath(path.join(__dirname, 'dist', 'characters', 'pet1.png'))
-    .crop({ x: 0, y: 0, width: 128, height: 128 })
-    .resize({ width: TRAY_ICON_SIZE, height: TRAY_ICON_SIZE, quality: 'best' })
+  const icon = nativeImage.createEmpty()
+  icon.addRepresentation({
+    scaleFactor: 1,
+    buffer: fs.readFileSync(path.join(__dirname, 'public', 'tray-icon.png')),
+  })
+  icon.addRepresentation({
+    scaleFactor: 2,
+    buffer: fs.readFileSync(path.join(__dirname, 'public', 'tray-icon@2x.png')),
+  })
 
   tray = new Tray(icon)
   tray.setToolTip('StudyMimi')
