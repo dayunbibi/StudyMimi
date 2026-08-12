@@ -1,9 +1,48 @@
-const { app, BrowserWindow, screen } = require('electron')
+const { app, BrowserWindow, ipcMain, screen } = require('electron')
 const path = require('node:path')
 
 const WINDOW_WIDTH = 180
 const WINDOW_HEIGHT = 180
 const SCREEN_MARGIN = 20
+const dragStates = new Map()
+
+function clampPosition(window, x, y) {
+  const bounds = window.getBounds()
+  const display = screen.getDisplayNearestPoint({
+    x: x + Math.round(bounds.width / 2),
+    y: y + Math.round(bounds.height / 2),
+  })
+  const area = display.workArea
+
+  return {
+    x: Math.min(Math.max(x, area.x), area.x + area.width - bounds.width),
+    y: Math.min(Math.max(y, area.y), area.y + area.height - bounds.height),
+  }
+}
+
+ipcMain.on('pet-drag-start', (event, mouseX, mouseY) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (!window || !Number.isFinite(mouseX) || !Number.isFinite(mouseY)) return
+
+  const [windowX, windowY] = window.getPosition()
+  dragStates.set(event.sender.id, { window, mouseX, mouseY, windowX, windowY })
+})
+
+ipcMain.on('pet-drag-move', (event, mouseX, mouseY) => {
+  const drag = dragStates.get(event.sender.id)
+  if (!drag || !Number.isFinite(mouseX) || !Number.isFinite(mouseY)) return
+
+  const position = clampPosition(
+    drag.window,
+    Math.round(drag.windowX + mouseX - drag.mouseX),
+    Math.round(drag.windowY + mouseY - drag.mouseY),
+  )
+  drag.window.setPosition(position.x, position.y)
+})
+
+ipcMain.on('pet-drag-end', (event) => {
+  dragStates.delete(event.sender.id)
+})
 
 function keepWindowOnScreen(window) {
   let isCorrectingPosition = false
@@ -43,6 +82,7 @@ function createPetWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(__dirname, 'electron-preload.cjs'),
     },
   })
 
