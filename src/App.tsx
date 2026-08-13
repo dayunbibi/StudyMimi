@@ -96,6 +96,7 @@ function App() {
   const [selectedCharacterId, setSelectedCharacterId] = useState(loadSelectedCharacterId)
   const [petSizeId, setPetSizeId] = useState(loadPetSizeId)
   const [roamPhase, setRoamPhase] = useState<'paused' | 'walking'>('paused')
+  const [facing, setFacing] = useState<'left' | 'right'>('right')
   const pointerStart = useRef<PointerStart | null>(null)
   const celebrateTimeout = useRef<number | null>(null)
 
@@ -108,7 +109,7 @@ function App() {
         : roamPhase === 'walking'
           ? 'celebrating'
           : 'idle'
-  const petStyle = useSpriteAnimation(character, animationKey, getPetSizeMultiplier(petSizeId))
+  const petStyle = useSpriteAnimation(character, animationKey, getPetSizeMultiplier(petSizeId), facing)
   const todayTotalSeconds = todayStudySeconds + (isStudying ? elapsedSeconds : 0)
 
   useEffect(() => {
@@ -247,6 +248,7 @@ function App() {
   }, [])
 
   useEffect(() => window.petWindow.onRoamPhase(setRoamPhase), [])
+  useEffect(() => window.petWindow.onRoamDirection(setFacing), [])
 
   return (
     <main className="pet" aria-label={`StudyMimi, ${isStudying ? 'Studying' : 'Resting'}`}>
