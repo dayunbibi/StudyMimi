@@ -81,6 +81,11 @@ function sendRoamPhase(window, phase) {
   window.webContents.send('roam-phase', phase)
 }
 
+function sendRoamDirection(window, direction) {
+  if (!window || window.isDestroyed()) return
+  window.webContents.send('roam-direction', direction)
+}
+
 function pickRoamTarget(window) {
   const bounds = window.getBounds()
   const area = screen.getDisplayMatching(bounds).workArea
@@ -140,6 +145,7 @@ function startRoamCycle(window) {
     }
 
     sendRoamPhase(window, 'walking')
+    if (dx !== 0) sendRoamDirection(window, dx > 0 ? 'right' : 'left')
     const steps = Math.max(1, Math.round(distance / ROAM_SPEED_PX_PER_TICK))
     let stepIndex = 0
 

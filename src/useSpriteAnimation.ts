@@ -8,6 +8,7 @@ export function useSpriteAnimation(
   character: CharacterConfig,
   animationKey: keyof CharacterConfig['animations'],
   extraScale = 1,
+  facing: 'left' | 'right' = 'right',
 ): CSSProperties {
   const [frameIndex, setFrameIndex] = useState(0)
   const animation = character.animations[animationKey]
@@ -29,6 +30,6 @@ export function useSpriteAnimation(
     backgroundImage: `url('${character.file}')`,
     backgroundSize: `${character.sheetWidth}px ${character.sheetHeight}px`,
     backgroundPosition: `-${frame.col * FRAME_SIZE}px -${frame.row * FRAME_SIZE}px`,
-    transform: `scale(${character.sizeScale * extraScale})`,
+    transform: `scale(${character.sizeScale * extraScale}) scaleX(${facing === 'left' ? -1 : 1})`,
   }
 }

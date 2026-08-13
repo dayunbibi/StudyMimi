@@ -15,9 +15,10 @@ const STATUS_LABEL: Record<FriendMimi['status'], string> = {
 function FriendPet({ friend }: { friend: FriendMimi }) {
   const [visible, setVisible] = useState(false)
   const [roamPhase, setRoamPhase] = useState<'paused' | 'walking'>('paused')
+  const [facing, setFacing] = useState<'left' | 'right'>('right')
   const character = getCharacterById(friend.characterId)
   const animationKey = friend.status === 'idle' && roamPhase === 'walking' ? 'celebrating' : friend.status
-  const petStyle = useSpriteAnimation(character, animationKey)
+  const petStyle = useSpriteAnimation(character, animationKey, 1, facing)
 
   useEffect(() => {
     const timer = window.setTimeout(() => setVisible(true), APPEAR_DELAY_MS)
@@ -25,6 +26,7 @@ function FriendPet({ friend }: { friend: FriendMimi }) {
   }, [])
 
   useEffect(() => window.petWindow.onRoamPhase(setRoamPhase), [])
+  useEffect(() => window.petWindow.onRoamDirection(setFacing), [])
 
   return (
     <main

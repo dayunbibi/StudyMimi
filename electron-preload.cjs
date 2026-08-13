@@ -16,4 +16,9 @@ contextBridge.exposeInMainWorld('petWindow', {
     ipcRenderer.on('roam-phase', listener)
     return () => ipcRenderer.removeListener('roam-phase', listener)
   },
+  onRoamDirection: (callback) => {
+    const listener = (_event, direction) => callback(direction)
+    ipcRenderer.on('roam-direction', listener)
+    return () => ipcRenderer.removeListener('roam-direction', listener)
+  },
 })
