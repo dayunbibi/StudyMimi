@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type {
-  CSSProperties,
-  KeyboardEvent as ReactKeyboardEvent,
-  PointerEvent as ReactPointerEvent,
-} from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import './App.css'
 import { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacterById } from './characters'
+import { useSpriteAnimation } from './useSpriteAnimation'
 
 const DRAG_THRESHOLD = 5
 const TODAY_STUDY_STORAGE_KEY = 'studymimi:todayStudySeconds'
@@ -13,7 +10,6 @@ const CHARACTER_STORAGE_KEY = 'studymimi:selectedCharacter'
 const PET_SIZE_STORAGE_KEY = 'studymimi:petSize'
 const CELEBRATE_DURATION_MS = 1500
 const TIRED_THRESHOLD_SECONDS = 60 * 60
-const FRAME_SIZE = 128
 
 type PointerStart = {
   pointerId: number
@@ -99,7 +95,7 @@ function App() {
   const [petAnimation, setPetAnimation] = useState<PetAnimation>('idle')
   const [selectedCharacterId, setSelectedCharacterId] = useState(loadSelectedCharacterId)
   const [petSizeId, setPetSizeId] = useState(loadPetSizeId)
-  const [frameIndex, setFrameIndex] = useState(0)
+  const [roamPhase, setRoamPhase] = useState<'paused' | 'walking'>('paused')
   const pointerStart = useRef<PointerStart | null>(null)
   const celebrateTimeout = useRef<number | null>(null)
 
@@ -107,15 +103,12 @@ function App() {
   const animationKey =
     petAnimation === 'studying' && elapsedSeconds >= TIRED_THRESHOLD_SECONDS
       ? 'tired'
-      : petAnimation
-  const animation = character.animations[animationKey]
-  const frame = animation.frames[frameIndex % animation.frames.length]
-  const petStyle: CSSProperties = {
-    backgroundImage: `url('${character.file}')`,
-    backgroundSize: `${character.sheetWidth}px ${character.sheetHeight}px`,
-    backgroundPosition: `-${frame.col * FRAME_SIZE}px -${frame.row * FRAME_SIZE}px`,
-    transform: `scale(${character.sizeScale * getPetSizeMultiplier(petSizeId)})`,
-  }
+      : petAnimation === 'studying' || petAnimation === 'celebrating'
+        ? petAnimation
+        : roamPhase === 'walking'
+          ? 'celebrating'
+          : 'idle'
+  const petStyle = useSpriteAnimation(character, animationKey, getPetSizeMultiplier(petSizeId))
   const todayTotalSeconds = todayStudySeconds + (isStudying ? elapsedSeconds : 0)
 
   useEffect(() => {
@@ -134,17 +127,6 @@ function App() {
       if (celebrateTimeout.current !== null) window.clearTimeout(celebrateTimeout.current)
     }
   }, [])
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduceMotion || animation.frames.length <= 1) return
-
-    const timer = window.setInterval(() => {
-      setFrameIndex((index) => (index + 1) % animation.frames.length)
-    }, animation.frameIntervalMs)
-
-    return () => window.clearInterval(timer)
-  }, [character.id, animationKey, animation])
 
   useEffect(() => {
     window.localStorage.setItem(PET_SIZE_STORAGE_KEY, petSizeId)
@@ -263,6 +245,8 @@ function App() {
       }
     })
   }, [])
+
+  useEffect(() => window.petWindow.onRoamPhase(setRoamPhase), [])
 
   return (
     <main className="pet" aria-label={`StudyMimi, ${isStudying ? 'Studying' : 'Resting'}`}>

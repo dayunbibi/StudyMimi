@@ -11,4 +11,9 @@ contextBridge.exposeInMainWorld('petWindow', {
     ipcRenderer.on('tray-command', listener)
     return () => ipcRenderer.removeListener('tray-command', listener)
   },
+  onRoamPhase: (callback) => {
+    const listener = (_event, phase) => callback(phase)
+    ipcRenderer.on('roam-phase', listener)
+    return () => ipcRenderer.removeListener('roam-phase', listener)
+  },
 })

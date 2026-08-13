@@ -5,6 +5,8 @@ type TrayCommand =
   | { type: 'select-character'; id: string }
   | { type: 'set-pet-size'; id: string }
 
+type RoamPhase = 'paused' | 'walking'
+
 declare global {
   interface Window {
     petWindow: {
@@ -19,6 +21,7 @@ declare global {
         petSizeId: string
       }) => void
       onTrayCommand: (callback: (command: TrayCommand) => void) => () => void
+      onRoamPhase: (callback: (phase: RoamPhase) => void) => () => void
     }
   }
 }
