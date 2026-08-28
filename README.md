@@ -96,4 +96,4 @@ Status
 
 Early Development / Prototype
 
-StudyMimi is currently under development and is not yet ready for public release.
+StudyMimi is in active early development — the core desktop pet experience is playable now, with social features (friends, real-time presence) in progress.
