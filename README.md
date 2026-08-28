@@ -1,75 +1,99 @@
-# React + TypeScript + Vite
+StudyMimi
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+StudyMimi is a social desktop study pet that makes studying feel less lonely.
 
-Currently, two official plugins are available:
+Instead of being another productivity app that you need to keep checking, StudyMimi lives directly on your desktop as a small animated companion.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+When you start studying, your MiniMi studies with you. When your friends start studying, their MiniMis can appear on your screen, creating the feeling of studying together even when everyone is somewhere else.
 
-## React Compiler
+Concept
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Imagine opening your laptop to work on an assignment and seeing your MiniMi sitting on your desktop studying.
 
-## Expanding the ESLint configuration
+A few minutes later, one of your friends starts studying.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Their MiniMi appears next to yours.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Now you’re studying together.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+StudyMimi combines:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Desktop pet experience
+* Study sessions and timers
+* Friends and social presence
+* Real-time study status
+* Customizable MiniMi characters
 
-```
+The goal is to create a study companion that feels alive rather than another productivity dashboard.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Current Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+StudyMimi is currently in early development.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The first version focuses on the core desktop pet experience:
 
-```
+* Transparent desktop pet window
+* Always-on-top MiniMi
+* Drag the MiniMi anywhere on the screen
+* Basic character states
+* Study timer
+* macOS support
+
+Social features will be added after the core desktop pet system is stable.
+
+Planned Features
+
+Future versions are planned to include:
+
+* User accounts
+* Friend system
+* Friend invitation codes
+* Real-time study presence
+* Friends’ MiniMis appearing on your desktop
+* Study, break, idle, and sleep animations
+* Character customization
+* Study session history
+* Multiple MiniMis on screen
+* Interactive MiniMi behaviors
+* MiniMis reacting to each other
+
+Tech Stack
+
+* Electron — Desktop application
+* React — User interface
+* TypeScript — Application logic
+* Supabase — Planned for authentication, database, friends, and real-time presence
+
+MiniMi States
+
+MiniMis will eventually react to what their users are doing.
+
+Idle
+  |
+Walking
+  |
+Studying
+  |
+Break
+  |
+Sleeping
+
+The long-term goal is for each MiniMi to behave like a small desktop companion rather than a static widget.
+
+Project Vision
+
+Most study apps require users to actively open an app, check statistics, or manage a productivity system.
+
+StudyMimi takes a different approach.
+
+Your friends’ presence becomes part of your desktop.
+
+You don’t need to message someone to ask whether they are studying. You can simply see their MiniMi studying next to yours.
+
+Study alone, together.
+
+Status
+
+Early Development / Prototype
+
+StudyMimi is currently under development and is not yet ready for public release.
