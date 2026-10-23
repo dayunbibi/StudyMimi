@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# local AI assistant notes
+AGENTS.md
+CLAUDE.md
